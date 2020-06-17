@@ -58,15 +58,24 @@ RSpec.describe Spree::AffirmController do
       let(:checkout_token) { "26VJRAAYE0MB0V25" }
 
       it "redirect to the confirm page" do
-        VCR.use_cassette 'callback_hook_authorize_success' do
+        post '/affirm/confirm', params: {
+          checkout_token: checkout_token,
+          payment_method_id: payment_method.id,
+          order_id: order.id,
+          use_route: :spree
+        }
+        expect(response).to redirect_to('/checkout/confirm')
+      end
+
+      it "moves the order to its next state" do
+        expect {
           post '/affirm/confirm', params: {
             checkout_token: checkout_token,
             payment_method_id: payment_method.id,
             order_id: order.id,
             use_route: :spree
           }
-          expect(response).to redirect_to('/checkout/confirm')
-        end
+        }.to change { order.reload.state }.from("payment").to("confirm")
       end
     end
   end

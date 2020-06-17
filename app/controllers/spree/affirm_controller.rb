@@ -22,9 +22,9 @@ module Spree
             payment_method_id: affirm_params[:payment_method_id],
             source: affirm_checkout
           })
-          hook = SolidusAffirm::Config.callback_hook.new
-          hook.authorize!(payment)
-          redirect_to hook.after_authorize_url(order)
+
+          order.next!
+          redirect_to checkout_state_path(order.state)
         end
       end
     end
